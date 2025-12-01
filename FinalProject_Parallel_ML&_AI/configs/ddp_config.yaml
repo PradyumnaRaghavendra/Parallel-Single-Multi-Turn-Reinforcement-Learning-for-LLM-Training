@@ -1,0 +1,49 @@
+# DDP Configuration - Matches Baseline Exactly
+# Baseline: batch=4, grad_accum=4, effective=16
+# DDP: batch=4, grad_accum=1, gpus=4, effective=4×1×4=16 
+
+model:
+  name: "Qwen/Qwen2.5-3B"
+  ref_model: "Qwen/Qwen2.5-3B"
+  max_length: 256
+  sft_max_length: 512
+  device: "cuda"
+  gradient_checkpointing: true     # Enable to save memory
+
+apo:
+  beta: 0.5
+  v_star_samples: 2                # REDUCED from 5 to save memory
+  adaptive_vstar: true
+  learning_rate: 0.0000003         # 3e-7 (same as baseline)
+  batch_size: 1                    # Per-GPU batch (4 GPUs total)
+  gradient_accumulation_steps: 4   # Effective: 1×4×4=16 
+  kl_coef: 0.03
+  use_exp_weights: false
+  adv_clip: 2.0
+  clip_grad_norm: 1.0
+  weighting_scheme: "normalized_advantage"
+  log_intermediate_values: false
+
+sampling:
+  temperature: 0.8
+  top_p: 0.9
+  top_k: 0
+
+training:
+  num_epochs: 2
+  max_steps: 100
+  eval_every: 25
+  save_every: 25
+
+data:
+  train_size: 400
+  eval_size: 50
+  tasks:
+    - "multiplication"
+    - "countdown"
+
+logging:
+  use_wandb: false
+  log_every: 5
+
+seed: 42

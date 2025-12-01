@@ -1,0 +1,49 @@
+# TinyZero Optimized Config
+
+
+model:
+  name: "Qwen/Qwen2.5-3B"
+  ref_model: "Qwen/Qwen2.5-3B"
+  max_length: 256
+  sft_max_length: 512
+  device: "cuda"
+
+apo:
+  beta: 0.5
+  v_star_samples: 5                # Base samples (adaptive will adjust)
+  adaptive_vstar: true             # Enable adaptive sampling (5→3→2)
+  learning_rate: 0.0000003         # 3e-7
+  batch_size: 4                    
+  gradient_accumulation_steps: 4
+  kl_coef: 0.03                    
+  use_exp_weights: false
+  adv_clip: 2.0
+  clip_grad_norm: 1.0
+  weighting_scheme: "normalized_advantage"
+  log_intermediate_values: false
+
+sampling:
+  temperature: 0.8
+  top_p: 0.9
+  top_k: 0
+
+training:
+  num_epochs: 2
+  max_steps: 200
+  eval_every: 50                   
+  save_every: 50                  
+
+data:
+  train_size: 400
+  eval_size: 50
+  tasks:
+    - "multiplication"             
+    - "countdown"  
+  # Both tasks = mixed training (recommended)
+  # One task = focused training
+
+logging:
+  use_wandb: false
+  log_every: 5
+
+seed: 42

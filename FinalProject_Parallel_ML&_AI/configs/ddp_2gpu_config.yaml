@@ -1,0 +1,49 @@
+# DDP 2-GPU Configuration - Fair Comparison with Baseline
+# Baseline: 2 epochs, 200 total steps, 1 GPU, batch=4, grad_accum=4, effective=16
+# DDP 2-GPU: 2 epochs, 200 total steps, 2 GPUs, batch=2, grad_accum=4, effective=16
+
+model:
+  name: "Qwen/Qwen2.5-3B"
+  ref_model: "Qwen/Qwen2.5-3B"
+  max_length: 256
+  sft_max_length: 512
+  device: "cuda"
+  gradient_checkpointing: true     # Enable to save memory
+
+apo:
+  beta: 0.5
+  v_star_samples: 2                # Reduced from 5 to save memory
+  adaptive_vstar: true
+  learning_rate: 0.0000003         # 3e-7 (same as baseline)
+  batch_size: 2                    # Per-GPU batch (2 GPUs total)
+  gradient_accumulation_steps: 4   # Effective: 2×2×4=16 
+  kl_coef: 0.03
+  use_exp_weights: false
+  adv_clip: 2.0
+  clip_grad_norm: 1.0
+  weighting_scheme: "normalized_advantage"
+  log_intermediate_values: false
+
+sampling:
+  temperature: 0.8
+  top_p: 0.9
+  top_k: 0
+
+training:
+  num_epochs: 2                    # Same as baseline (2 epochs)
+  max_steps: 200                   # 100 steps per epoch × 2 epochs = 200 total
+  eval_every: 50                   # Eval at steps 50, 100, 150, 200
+  save_every: 50                   # Save at steps 50, 100, 150, 200
+
+data:
+  train_size: 200                  # FIXED: 200÷2=100 batches/epoch × 2 epochs = 200 steps
+  eval_size: 50
+  tasks:
+    - "multiplication"
+    - "countdown"
+
+logging:
+  use_wandb: false
+  log_every: 5
+
+seed: 42
